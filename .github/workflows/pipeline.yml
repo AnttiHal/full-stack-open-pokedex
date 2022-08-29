@@ -47,6 +47,8 @@ jobs:
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-20.04
     steps:
+      - name: init git    
+        run: git init
       - name: Bump version and push tag
         uses: anothrNick/github-tag-action@1.36.0
         env:
