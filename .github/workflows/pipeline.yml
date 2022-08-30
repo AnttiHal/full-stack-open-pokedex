@@ -61,7 +61,8 @@ jobs:
           text: A new version of Pokedex deployed
           description: to https://arcane-forest-73347.herokuapp.com/ by AnttiHal
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-
+      
+      
   tag_release:
     needs: simple_deployment_pipeline
     if: ${{ github.event_name == 'push' && !contains(join(github.commits.*.message, ' '), '#skip') }}
