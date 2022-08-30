@@ -22,6 +22,7 @@ jobs:
       - name: lint
         run: npm run eslint
       - name: build
+        id: build
         run: npm run build
       - name: test
         run: npm test
@@ -32,8 +33,9 @@ jobs:
           start: npm run start-prod
           wait-on: http://localhost:5000
           wait-on-timeout: 120
-      
-      - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+
+      - name: deploy
+        uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "arcane-forest-73347" #Must be unique in Heroku
@@ -41,6 +43,23 @@ jobs:
           healthcheck: "https://arcane-forest-73347.herokuapp.com/health"
           checkstring: "ok"
           rollbackonhealthcheckfailed: true
+
+      - name: The build has failed
+        uses: rjstone/discord-webhook-notify@v1
+        if: ${{ failure() && steps.build.conclusion == 'failure' }}
+        with:
+          severity: error
+          text: Build failed
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      
+      - name: The deployment has succeeded
+        uses: rjstone/discord-webhook-notify@v1
+        if: ${{ success() && steps.deploy.conclusion == 'success' }}
+        with:
+          severity: info
+          text: A new version of Pokedex deployed
+          description: to https://arcane-forest-73347.herokuapp.com/ by AnttiHal
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 
   tag_release:
     needs: simple_deployment_pipeline
